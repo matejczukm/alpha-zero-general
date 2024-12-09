@@ -10,6 +10,7 @@ import logging
 log = logging.getLogger(__name__)
  
 class AIPlayer():
+
     def __init__(self, size, mode = 'tri'):
 
         args = dotdict({'numMCTSSims': 10, 'cpuct': 1.0})
@@ -30,6 +31,9 @@ class AIPlayer():
         self.mcts = MCTS(self.game,self.nnet, args)
 
     def mcts_get_action(self, board, turn):
+        '''
+        Returns np.array representation of model's action using mcts simulations
+        '''
 
         valids = self.game.getValidMoves(board, 1, turn)
         probs = self.mcts.getActionProb(board, turn, temp=0)
@@ -42,6 +46,9 @@ class AIPlayer():
 
 
     def nnet_get_action(self, board, turn):
+        '''
+        Returns np.array representation of model's action using only neural net predicition
+        '''
         valids = self.game.getValidMoves(board, 1, turn)
         probs, v = self.nnet.predict(board)
         if np.max(probs*valids)==0:
