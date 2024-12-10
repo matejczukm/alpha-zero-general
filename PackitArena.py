@@ -118,7 +118,7 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
-        one_on_the_play, two_on_the_play = oneWon, twoWon
+        one_on_the_play, two_on_the_draw = oneWon, twoWon
         self.player1, self.player2 = self.player2, self.player1
 
         for _ in tqdm(range(num), desc="Arena.playGames (2)"):
@@ -130,7 +130,7 @@ class Arena():
             else:
                 draws += 1
         one_on_the_draw = oneWon-one_on_the_play
-        two_on_the_draw = twoWon-two_on_the_play
+        two_on_the_play = twoWon-two_on_the_draw
         
         result_table = {
         "Player": ["Player 1", "Player 2"],

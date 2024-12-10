@@ -11,22 +11,23 @@ log = logging.getLogger(__name__)
  
 class AIPlayer():
 
-    def __init__(self, size, mode = 'tri'):
+    def __init__(self, size, mode = 'triangular'):
 
         args = dotdict({'numMCTSSims': 10, 'cpuct': 1.0})
 
         #this if clause can be better
-        if mode == 'tri':
+        if mode == 'triangular':
             self.game = TriangleGame(size)
 
             #random model for now
             self.nnet = TriNet(self.game)
-        else:
+        elif mode == 'hexagonal':
             self.game = HexGame(size)
 
             #random model for now
             self.nnet = HexNet(self.game)
-        
+        else:
+            raise Exception('Invalid mode')
 
         self.mcts = MCTS(self.game,self.nnet, args)
 
@@ -36,6 +37,8 @@ class AIPlayer():
         '''
 
         valids = self.game.getValidMoves(board, 1, turn)
+        if np.max(valids) == 0:
+            return np.zeros_like(board)
         probs = self.mcts.getActionProb(board, turn, temp=0)
         if np.max(probs*valids)==0:
             log.info('Returning random move')
@@ -50,6 +53,8 @@ class AIPlayer():
         Returns np.array representation of model's action using only neural net predicition
         '''
         valids = self.game.getValidMoves(board, 1, turn)
+        if np.max(valids) == 0:
+            return np.zeros_like(board)
         probs, v = self.nnet.predict(board)
         if np.max(probs*valids)==0:
             log.info('Returning random move')
