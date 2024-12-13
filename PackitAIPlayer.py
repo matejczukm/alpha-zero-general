@@ -51,7 +51,7 @@ class AIPlayer():
                     self.nnet.nnet.model.load_weights(tf.keras.utils.get_file(args.weights_filename, weights_path))
                     self.nnet.save_checkpoint(folder=args.tri_weights_folder, filename=args.weights_filename)
                 except Exception as e:
-                    print(e)
+                    #print(e)
                     print('Weights not found, using untrained model')
                 
 
@@ -124,3 +124,15 @@ class AIPlayer():
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs*valids)
         return self.game.action_space[action_ix]
+    
+    def get_action_for_arena(self, board, turn):
+        valids = self.game.getValidMoves(board, 1, turn)
+        if np.max(valids) == 0:
+            return np.zeros_like(board)
+        probs = self.mcts.getActionProb(board, turn, temp=0)
+        if np.max(probs*valids)==0:
+            log.info('Returning random move')
+            action_ix = np.random.choice(np.nonzero(valids)[0])
+            return self.game.action_space[action_ix]
+        action_ix = np.argmax(probs*valids)
+        return action_ix
