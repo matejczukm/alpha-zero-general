@@ -28,8 +28,8 @@ class AIPlayer:
                         'weights_filename': 'best.weights.h5',
                         # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
                         # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
-                        'hex_hf_weights_path': 'hex_models/',
-                        'tri_hf_weights_path': 'triangle_models/',
+                        'hex_hf_weights_path': 'keras/hex_models/',
+                        'tri_hf_weights_path': 'keras/triangle_models/',
                         'hf_repo_id': 'lgfn/packit-polygons-models'})
 
         if mode == 'triangular':
