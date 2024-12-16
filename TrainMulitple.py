@@ -10,6 +10,7 @@ from HexGame.keras.NNetSmall import NNetWrapper as hexnnetsm
 from TriangleGame.keras.NNet import NNetWrapper as trinnet
 from TriangleGame.keras.NNetSmall import NNetWrapper as trinnetsm
 from utils import *
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -23,78 +24,80 @@ args = dotdict({
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
     'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
-    'cpuct': 1,
+    'cpucts': [1, 1.5, 2, 5],
     'checkpoint': './packit-polygons-models/',
     'load_model': False,
     'load_folder_file': ('/dev/models/8x100x50','best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
-    'tri_board_sizes': [3,4,5],
-    'hex_board_sizes': [3,4,5]
+    'tri_board_sizes': [],
+    'hex_board_sizes': [3,4]
 })
 
 
 def main():
-    for size in args.tri_board_sizes:
+    # for size in args.tri_board_sizes:
 
-        log.info('Loading %s...', TriangleGame.__name__)
-        g = TriangleGame(size)
+    #     log.info('Loading %s...', TriangleGame.__name__)
+    #     g = TriangleGame(size)
         
-        log.info('Loading %s...', trinnet.__name__)
-        if size < 5:
+    #     log.info('Loading %s...', trinnet.__name__)
+    #     if size < 5:
             
-            nnet = trinnetsm(g)
-        else:
-            nnet = trinnet(g)
+    #         nnet = trinnetsm(g)
+    #     else:
+    #         nnet = trinnet(g)
         
 
-        # if args.load_model:
-        #     log.info('Loading checkpoint "%s/%s"...', args.load_folder_file[0], args.load_folder_file[1])
-        #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
-        # else:
-        #     log.warning('Not loading a checkpoint!')
+    #     # if args.load_model:
+    #     #     log.info('Loading checkpoint "%s/%s"...', args.load_folder_file[0], args.load_folder_file[1])
+    #     #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    #     # else:
+    #     #     log.warning('Not loading a checkpoint!')
 
-        log.info('Loading the Coach...')
-        args.checkpoint = './packit-polygons-models/triangle_models/size_'+str(size)+'/'
-        c = Coach(g, nnet, args)
+    #     log.info('Loading the Coach...')
+    #     timestamp = datetime.now().strftime('%m%d%H%M')
 
-        # if args.load_model:
-        #     log.info("Loading 'trainExamples' from file...")
-        #     c.loadTrainExamples()
+    #     args.checkpoint = './packit-polygons-models/hex_models/size_' + str(size) + '/' + timestamp + '/'        
+    #     c = Coach(g, nnet, args)
 
-        log.info('Starting the learning process for board of size %s 🎉', size)
-        c.learn()
+    #     # if args.load_model:
+    #     #     log.info("Loading 'trainExamples' from file...")
+    #     #     c.loadTrainExamples()
 
-
-
+    #     log.info('Starting the learning process for board of size %s 🎉', size)
+    #     c.learn()
 
     for size in args.hex_board_sizes:
+        for cpuct in args.cpucts:
+                
+            log.info('Loading %s...', HexGame.__name__)
+            g = HexGame(size)
+            
+            log.info('Loading %s...', hexnnet.__name__)
+            if size < 3:
+                nnet = hexnnetsm(g)
+            else:
+                nnet = hexnnet(g)
+            
 
-        log.info('Loading %s...', HexGame.__name__)
-        g = HexGame(size)
-        
-        log.info('Loading %s...', hexnnet.__name__)
-        if size < 3:
-            nnet = hexnnetsm(g)
-        else:
-            nnet = hexnnet(g)
-        
+            # if args.load_model:
+            #     log.info('Loading checkpoint "%s/%s"...', args.load_folder_file[0], args.load_folder_file[1])
+            #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+            # else:
+            #     log.warning('Not loading a checkpoint!')
 
-        # if args.load_model:
-        #     log.info('Loading checkpoint "%s/%s"...', args.load_folder_file[0], args.load_folder_file[1])
-        #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
-        # else:
-        #     log.warning('Not loading a checkpoint!')
+            log.info('Loading the Coach...')
+            timestamp = datetime.now().strftime('%m%d%H%M')
+            args.cpuct = cpuct
+            args.checkpoint = './packit-polygons-models/hex_models/size_' + str(size) + '/' + 'c_'+str(cpuct) + '/' + timestamp + '/'   
+            c = Coach(g, nnet, args)
 
-        log.info('Loading the Coach...')
-        args.checkpoint = './packit-polygons-models/hex_models/size_'+str(size)+'/'
-        c = Coach(g, nnet, args)
+            # if args.load_model:
+            #     log.info("Loading 'trainExamples' from file...")
+            #     c.loadTrainExamples()
 
-        # if args.load_model:
-        #     log.info("Loading 'trainExamples' from file...")
-        #     c.loadTrainExamples()
-
-        log.info('Starting the learning process for board of size %s 🎉', size)
-        c.learn()
+            log.info('Starting the learning process for board of size %s 🎉', size)
+            c.learn()
 
 if __name__ == "__main__":
     main()

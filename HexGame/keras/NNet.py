@@ -12,7 +12,7 @@ from NeuralNet import NeuralNet
 
 import argparse
 
-from .HexNNet import HexNNet as hxnnet
+from .HexNNet2 import HexNNet as hxnnet
 
 args = dotdict({
     'lr': 0.001,
