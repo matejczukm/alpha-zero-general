@@ -5,6 +5,7 @@ from tqdm import tqdm
 log = logging.getLogger(__name__)
 import numpy as np
 
+
 class Arena():
     """
     An Arena class where any 2 agents can be pit against each other.
@@ -45,10 +46,10 @@ class Arena():
         for player in players[0], players[2]:
             if hasattr(player, "startGame"):
                 player.startGame()
-        
+
         is_game_over = self.game.getGameEnded(board, curPlayer, 1)
-        
-        while  is_game_over == 0:
+
+        while is_game_over == 0:
             it += 1
 
             if verbose:
@@ -58,7 +59,6 @@ class Arena():
 
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer), it)
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1, it)
-  
 
             if valids[action] == 0:
                 log.error(f'Action {action} is not valid!')
@@ -70,30 +70,25 @@ class Arena():
             if hasattr(opponent, "notify"):
                 opponent.notify(board, action)
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
-            
-            board_history+=board
 
-            
-            is_game_over = self.game.getGameEnded(board, curPlayer, it+1)
+            board_history += board
 
+            is_game_over = self.game.getGameEnded(board, curPlayer, it + 1)
 
         for player in players[0], players[2]:
             if hasattr(player, "endGame"):
                 player.endGame()
 
-        board_history = (board_history - np.max(board_history))*(-1)
+        board_history = (board_history - np.max(board_history)) * (-1)
         board_history[board_history == 0] = -1
-        board_history[board_history == np.max(board_history)]= 0
+        board_history[board_history == np.max(board_history)] = 0
 
         if verbose:
             assert self.game.display
-            print("Game over: Turn ", str(it), "Result: Player ", str(curPlayer*is_game_over), " wins!")
+            print("Game over: Turn ", str(it), "Result: Player ", str(curPlayer * is_game_over), " wins!")
             self.game.display(board_history)
 
-
-        return curPlayer*is_game_over
-        
-        
+        return curPlayer * is_game_over
 
     def playGames(self, num, verbose=False):
         """
@@ -129,13 +124,13 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
-        one_on_the_draw = oneWon-one_on_the_play
-        two_on_the_play = twoWon-two_on_the_draw
-        
+        one_on_the_draw = oneWon - one_on_the_play
+        two_on_the_play = twoWon - two_on_the_draw
+
         result_table = {
-        "Player": ["Player 1", "Player 2"],
-        "Games Won Going First": [one_on_the_play, two_on_the_play],
-        "Games Won Going Second": [one_on_the_draw, two_on_the_draw],
+            "Player": ["Player 1", "Player 2"],
+            "Games Won Going First": [one_on_the_play, two_on_the_play],
+            "Games Won Going Second": [one_on_the_draw, two_on_the_draw],
         }
 
         header = f"{'Player':<12}{'Going First':<18}{'Going Second':<15}"

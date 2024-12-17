@@ -1,11 +1,10 @@
 from __future__ import print_function
 import sys
+
 sys.path.append('..')
 from Game import Game
 from .HexLogic import *
 import numpy as np
-
-
 
 
 class HexGame(Game):
@@ -18,30 +17,28 @@ class HexGame(Game):
 
     See othello/OthelloGame.py for an example implementation.
     """
+
     def __init__(self, board_side):
         self.board_side = board_side
-        self.board_size = board_side*2-1
+        self.board_size = board_side * 2 - 1
 
-        number_of_fields = (self.board_size)**2 - (self.board_size-board_side)*(self.board_size-board_side+1)
-        
-        #checking the sum of arithmetic series by calculating delta
-        self.max_k = int(np.floor((np.sqrt(8*number_of_fields+1)-1)/2))
-        #print("max_k: ", self.max_k)
-         
+        number_of_fields = (self.board_size) ** 2 - (self.board_size - board_side) * (self.board_size - board_side + 1)
+
+        # checking the sum of arithmetic series by calculating delta
+        self.max_k = int(np.floor((np.sqrt(8 * number_of_fields + 1) - 1) / 2))
+        # print("max_k: ", self.max_k)
+
         self.action_space = np.zeros([0, self.board_size, self.board_size])
 
-        #placements of shapes of size i begin at partition_indices[i-1] and end at partition_indices[i]-1
-        self.partition_indices = np.zeros(self.max_k+1)
+        # placements of shapes of size i begin at partition_indices[i-1] and end at partition_indices[i]-1
+        self.partition_indices = np.zeros(self.max_k + 1)
 
-        for k in range(1, self.max_k+1):
+        for k in range(1, self.max_k + 1):
             new_placements = np.array(get_possible_placements_for_k(self.getInitBoard(), k))
             self.action_space = np.concatenate((self.action_space, new_placements))
-            self.partition_indices[k] = self.partition_indices[k-1] + len(new_placements)
-        
+            self.partition_indices[k] = self.partition_indices[k - 1] + len(new_placements)
+
         self.partition_indices = self.partition_indices.astype(np.int64)
-
-
-
 
     def getInitBoard(self):
         """
@@ -52,7 +49,6 @@ class HexGame(Game):
         board = generate_board(self.board_side)
 
         return board
-        
 
     def getBoardSize(self):
         """
@@ -79,8 +75,8 @@ class HexGame(Game):
             nextBoard: board after applying action
             nextPlayer: player who plays in the next turn (should be -player)
         """
-        
-        return (board+self.action_space[action], -player)
+
+        return (board + self.action_space[action], -player)
 
     def getValidMoves(self, board, player, turn):
         """
@@ -93,20 +89,19 @@ class HexGame(Game):
                         moves that are valid from the current board and player,
                         0 for invalid moves
         """
-        if turn>self.max_k:
+        if turn > self.max_k:
             return np.zeros(len(self.action_space))
-        
-        left_zeros = np.zeros(self.partition_indices[turn-1])
+
+        left_zeros = np.zeros(self.partition_indices[turn - 1])
         if turn < self.max_k:
-            action_space_slice = self.action_space[self.partition_indices[turn-1]:self.partition_indices[turn+1]]
+            action_space_slice = self.action_space[self.partition_indices[turn - 1]:self.partition_indices[turn + 1]]
             valids = validate_placements(action_space_slice, board)
-            right_zeros = np.zeros(self.partition_indices[-1]-self.partition_indices[turn+1])
+            right_zeros = np.zeros(self.partition_indices[-1] - self.partition_indices[turn + 1])
             return np.hstack((left_zeros, valids, right_zeros))
-        
-        action_space_slice = self.action_space[self.partition_indices[turn-1]:self.partition_indices[turn]]
+
+        action_space_slice = self.action_space[self.partition_indices[turn - 1]:self.partition_indices[turn]]
         valids = validate_placements(action_space_slice, board)
         return np.hstack((left_zeros, valids))
-
 
     def getGameEnded(self, board, player, turn):
         """
@@ -122,7 +117,7 @@ class HexGame(Game):
         if np.sum(self.getValidMoves(board, player, turn)) == 0:
             return -1
         return 0
-    
+
     def getCanonicalForm(self, board, player):
         """
         Input:
@@ -138,7 +133,6 @@ class HexGame(Game):
                             the colors and return the board.
         """
         return board
-    
 
     def getSymmetries(self, board, pi):
         """
@@ -163,9 +157,7 @@ class HexGame(Game):
                          Required by MCTS for hashing.
         """
         return np.array2string(board)
-    
 
     @staticmethod
     def display(board):
         print(np.array2string(board))
-
