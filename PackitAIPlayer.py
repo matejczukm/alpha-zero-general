@@ -23,8 +23,8 @@ class AIPlayer:
         mcts_args = dotdict({'numMCTSSims': 10,
                              'cpuct': 1.0})
 
-        args = dotdict({'tri_weights_folder': './packit-polygons-models/triangle_models/',
-                        'hex_weights_folder': './packit-polygons-models/hex_models/',
+        args = dotdict({'tri_weights_folder': './alpha-zero-general/packit-polygons-models/triangle_models/pytorch/',
+                        'hex_weights_folder': './alpha-zero-general/packit-polygons-models/hex_models/pytorch/',
                         'weights_filename': 'best.cpuct_1.pth.tar',
                         # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
                         # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
@@ -133,3 +133,15 @@ class AIPlayer:
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs * valids)
         return self.game.action_space[action_ix]
+
+    def get_action_for_arena(self, board, turn):
+        valids = self.game.getValidMoves(board, 1, turn)
+        if np.max(valids) == 0:
+            return np.zeros_like(board)
+        probs = self.mcts.getActionProb(board, turn, temp=0)
+        if np.max(probs*valids)==0:
+            log.info('Returning random move')
+            action_ix = np.random.choice(np.nonzero(valids)[0])
+            return self.game.action_space[action_ix]
+        action_ix = np.argmax(probs*valids)
+        return action_ix
