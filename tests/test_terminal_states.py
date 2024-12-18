@@ -68,7 +68,7 @@ for i in tqdm(range(n)):
     # print('MCTS did' + ' not' if mcts_winning_move else '' + ' find winning move.')
     nn_wins -= nn_winning_move
     mcts_wins -= mcts_winning_move
-    if not (nn_winning_move or mcts_winning_move):
+    if not mcts_winning_move:
         # print(prev_board)
         boards.append(prev_board)
 
