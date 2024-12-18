@@ -23,13 +23,13 @@ class AIPlayer:
         mcts_args = dotdict({'numMCTSSims': 10,
                              'cpuct': 1.0})
 
-        args = dotdict({'tri_weights_folder': './packit-polygons-models/triangle_models/',
-                        'hex_weights_folder': './packit-polygons-models/hex_models/',
-                        'weights_filename': 'best.weights.h5',
+        args = dotdict({'tri_weights_folder': './alpha-zero-general/packit-polygons-models/triangle_models/pytorch/',
+                        'hex_weights_folder': './alpha-zero-general/packit-polygons-models/hex_models/pytorch/',
+                        'weights_filename': 'best.pth.tar',
                         # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
                         # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
-                        'hex_hf_weights_path': 'hex_models/',
-                        'tri_hf_weights_path': 'triangle_models/',
+                        'hex_hf_weights_path': 'hex_models/pytorch/',
+                        'tri_hf_weights_path': 'triangle_models/pytorch/',
                         'hf_repo_id': 'lgfn/packit-polygons-models'})
 
         if mode == 'triangular':
