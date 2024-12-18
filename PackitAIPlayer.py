@@ -25,11 +25,11 @@ class AIPlayer:
 
         args = dotdict({'tri_weights_folder': './packit-polygons-models/triangle_models/',
                         'hex_weights_folder': './packit-polygons-models/hex_models/',
-                        'weights_filename': 'best.weights.h5',
+                        'weights_filename': 'best.cpuct_1.pth.tar',
                         # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
                         # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
-                        'hex_hf_weights_path': 'keras/hex_models/',
-                        'tri_hf_weights_path': 'keras/triangle_models/',
+                        'hex_hf_weights_path': 'pytorch/hex_models/',
+                        'tri_hf_weights_path': 'pytorch/triangle_models/',
                         'hf_repo_id': 'lgfn/packit-polygons-models'})
 
         if mode == 'triangular':
