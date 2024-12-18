@@ -76,6 +76,9 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
+        best_filename = self.args.best_filename+'_cpuct_'+str(self.args.cpuct) + '.pth.tar'
+        temp_filename = 'temp' + '.pth.tar'
+
         for i in range(1, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
@@ -105,8 +108,8 @@ class Coach():
             shuffle(trainExamples)
 
             # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=temp_filename)
+            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename=temp_filename)
             pmcts = MCTS(self.game, self.pnet, self.args)
 
             self.nnet.train(trainExamples)
@@ -117,30 +120,33 @@ class Coach():
                           lambda x,t: np.argmax(nmcts.getActionProb(x, t, temp=0)), self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
-            log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+            log.info('NEW/PREV WINS : %d / %d' % (nwins, pwins))
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename=temp_filename)
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=best_filename)
 
-    def getCheckpointFile(self, iteration):
-        return 'checkpoint_' + str(iteration) + '.pth.tar'
+    def getCheckpointFile(self, iteration, last=False):
+        if last:
+            return 'last_checkpoint_cpuct_' + str(self.args.cpuct) + '.pth.tar'
+        return 'checkpoint_' +  str(iteration) + '.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint
         if not os.path.exists(folder):
             os.makedirs(folder)
-        filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
+        last = (iteration == self.args.numIters-1)
+        filename = os.path.join(folder, self.getCheckpointFile(iteration, last) + ".examples")
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
         f.closed
 
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = modelFile + ".examples"
+        examplesFile = self.getCheckpointFile(0, True) + '.examples'
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
             r = input("Continue? [y|n]")
