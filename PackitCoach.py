@@ -146,7 +146,7 @@ class Coach():
 
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = self.getCheckpointFile(0, True) + '.examples'
+        examplesFile = os.path.join(self.args.load_folder_file[0], self.getCheckpointFile(0, True)) + '.examples'
         if not os.path.isfile(examplesFile):
             log.warning(f'File "{examplesFile}" with trainExamples not found!')
             r = input("Continue? [y|n]")

@@ -28,14 +28,14 @@ args = dotdict({
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
     'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
     'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
-    'cpuct': 1.2,
+    'cpuct': 1,
     'checkpoint': './packit-polygons-models/',
-    'load_model': False,
-    'load_folder_file': ('./packit-polygons-models/pytorch/','best_cpuct_1.pth.tar'),
+    'load_model': True,
+    'load_folder_file': ('./packit-polygons-models/pytorch','best_cpuct_1.pth.tar'),
     'best_filename': 'best',
     'numItersForTrainExamplesHistory': 20,
-    'tri_board_sizes': [],
-    'hex_board_sizes': [2],
+    'tri_board_sizes': [3],
+    'hex_board_sizes': [],
     'model': 'pytorch' #either pytorch or keras
 })
 
@@ -65,7 +65,7 @@ def main():
             return
 
         
-        args.load_folder_file = ('./packit-polygons-models/' + args.model + '/triangle_models/size_'+str(size), 'best.pth.tar')
+        args.load_folder_file = ('./packit-polygons-models/' + args.model + '/triangle_models/size_'+str(size), args.load_folder_file[1])
 
         if args.load_model:
             log.info('Loading checkpoint "%s%s"...', args.load_folder_file[0], args.load_folder_file[1])
@@ -74,7 +74,7 @@ def main():
             log.warning('Not loading a checkpoint!')
 
         log.info('Loading the Coach...')
-        args.checkpoint = './packit-polygons-models/' + args.model + '/triangle_models/size_'+str(size)+'/'
+        args.checkpoint = './packit-polygons-models/' + args.model + '/triangle_models/size_'+str(size)
         c = Coach(g, nnet, args)
 
         if args.load_model:
@@ -108,7 +108,7 @@ def main():
             log.error('Incorrect model argument, choose pytorch or keras')
             return
         
-        args.load_folder_file = ('./packit-polygons-models/' + args.model + '/triangle_models/size_'+str(size), 'best.pth.tar')
+        args.load_folder_file = ('./packit-polygons-models/' + args.model + '/hex_models/size_'+str(size),  args.load_folder_file[1])
 
 
         if args.load_model:
@@ -118,7 +118,7 @@ def main():
             log.warning('Not loading a checkpoint!')
 
         log.info('Loading the Coach...')
-        args.checkpoint = './packit-polygons-models/' + args.model + '/hex_models/size_'+str(size)+'/'
+        args.checkpoint = './packit-polygons-models/' + args.model + '/hex_models/size_'+str(size)
         c = Coach(g, nnet, args)
 
         if args.load_model:
