@@ -18,8 +18,12 @@ weights_filename = 'best.weights.h5'
 hf_repo_id = 'lgfn/packit-polygons-models'
 
 random_vs_cpu = False
-from_hf = True
-size = 3
+from_hf = False
+size = 4
+num_sims = 10
+
+c1 = 5
+c2 = 5
 
 g = HexGame(size)
 
@@ -35,8 +39,8 @@ n1 = HexKerasNNet(g)
 # if mini_othello:
 #     n1.load_checkpoint('./pretrained_models/othello/pytorch/','6x100x25_best.pth.tar')
 # else:
-n1.load_checkpoint('./packit-polygons-models/hex_models/size_'+str(size)+'/','best.weights.h5')
-args1 = dotdict({'numMCTSSims': 50, 'cpuct':1.0})
+n1.load_checkpoint('./packit-polygons-models/hex_models/size_'+str(size)+f'/c_{c1}/','best.weights.h5')
+args1 = dotdict({'numMCTSSims': num_sims, 'cpuct':1.0})
 mcts1 = MCTS(g, n1, args1)
 # n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 n1p = lambda x, t: np.argmax(mcts1.getActionProb(x, t, temp=0))
@@ -52,7 +56,7 @@ elif from_hf:
     # HexKerasNNet.nnet.model.load_weights(weights_path)
     n2 = HexKerasNNet(g)
     n2.nnet.model.load_weights(weights_path)
-    args2 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
+    args2 = dotdict({'numMCTSSims': num_sims, 'cpuct': 1.0})
     mcts2 = MCTS(g, n2, args2)
     # n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
     n2p = lambda x, t: np.argmax(mcts2.getActionProb(x, t, temp=0))
@@ -60,8 +64,10 @@ elif from_hf:
     player2 = n2p
 else:
     n2 = HexKerasNNet(g)
-    n2.load_checkpoint('./hex_temp/', 'best.weights.h5')
-    args2 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
+    # n2.load_checkpoint('./hex_temp/', 'best.weights.h5')
+    n2.load_checkpoint('./packit-polygons-models/hex_models/size_'+str(size)+f'/c_{c2}/','best.weights.h5')
+
+    args2 = dotdict({'numMCTSSims': num_sims, 'cpuct': 1.0})
     mcts2 = MCTS(g, n2, args2)
     # n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
     n2p = lambda x, t: np.argmax(mcts2.getActionProb(x, t, temp=0))
