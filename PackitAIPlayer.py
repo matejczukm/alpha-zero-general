@@ -25,7 +25,7 @@ class AIPlayer:
 
         args = dotdict({'tri_weights_folder': './alpha-zero-general/packit-polygons-models/triangle_models/pytorch/',
                         'hex_weights_folder': './alpha-zero-general/packit-polygons-models/hex_models/pytorch/',
-                        'weights_filename': 'best.cpuct_1.pth.tar',
+                        'weights_filename': 'best.cpuct_5.pth.tar',
                         # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
                         # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
                         'hex_hf_weights_path': 'pytorch/hex_models/',

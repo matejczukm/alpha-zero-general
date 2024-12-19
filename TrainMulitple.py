@@ -21,21 +21,21 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 3,             # Number of iterations
-    'numEps': 25,              # Number of complete self-play games to simulate during a new iteration.
+    'numIters': 20,             # Number of iterations
+    'numEps': 40,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-    'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
-    'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
-    'cpuct': 1,
+    'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 20,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 10,
     'checkpoint': './packit-polygons-models/',
-    'load_model': True,
-    'load_folder_file': ('./packit-polygons-models/pytorch','best_cpuct_1.pth.tar'),
+    'load_model': False,
+    'load_folder_file': ('./packit-polygons-models/pytorch','best_cpuct_10.pth.tar'),
     'best_filename': 'best',
     'numItersForTrainExamplesHistory': 20,
-    'tri_board_sizes': [3],
-    'hex_board_sizes': [],
+    'tri_board_sizes': [],
+    'hex_board_sizes': [5],
     'model': 'pytorch' #either pytorch or keras
 })
 
