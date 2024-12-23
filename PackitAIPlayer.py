@@ -148,7 +148,7 @@ class AIPlayer:
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs * valids)
         return self.game.action_space[action_ix]
-    
+
     def get_action_for_arena(self, board, turn):
         valids = self.game.getValidMoves(board, 1, turn)
         if np.max(valids) == 0:

@@ -31,7 +31,6 @@ class AIPlayer:
             self.game = TriangleGame(size)
             args.tri_weights_folder += 'size_' + str(size) + '/'
 
-
             self.nnet = TriNet(self.game)
 
             weights_path = args.tri_hf_weights_path + 'size_' + str(size) + '/' + self.weights_filename
@@ -46,7 +45,7 @@ class AIPlayer:
                 checkpoint = torch.load(weights_hf, map_location=map_location, weights_only=True)
                 self.nnet.nnet.load_state_dict(checkpoint['state_dict'])
                 print('Donwload successful')
-            
+
             except Exception as e:
                 print(e)
                 print('Weights not found, using untrained model')
@@ -59,7 +58,6 @@ class AIPlayer:
             self.nnet = HexNet(self.game)
 
             weights_path = args.hex_hf_weights_path + 'size_' + str(size) + '/' + self.weights_filename
-
 
             try:
                 print('Downloading weights...')
@@ -80,7 +78,7 @@ class AIPlayer:
             raise Exception('Invalid mode')
 
         self.mcts = MCTS(self.game, self.nnet, mcts_args)
-        
+
         return
 
     def mcts_get_action(self, board, turn):
@@ -113,15 +111,15 @@ class AIPlayer:
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs * valids)
         return self.game.action_space[action_ix]
-    
+
     def get_action_for_arena(self, board, turn):
         valids = self.game.getValidMoves(board, 1, turn)
         if np.max(valids) == 0:
             return np.zeros_like(board)
         probs = self.mcts.getActionProb(board, turn, temp=0)
-        if np.max(probs*valids)==0:
+        if np.max(probs * valids) == 0:
             log.info('Returning random move')
             action_ix = np.random.choice(np.nonzero(valids)[0])
             return self.game.action_space[action_ix]
-        action_ix = np.argmax(probs*valids)
+        action_ix = np.argmax(probs * valids)
         return action_ix
