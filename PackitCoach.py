@@ -20,14 +20,14 @@ class Coach():
     in Game and NeuralNet. args are specified in main.py.
     """
 
-    def __init__(self, game, nnet, args):
+    def __init__(self, game, nnet, args, trainExamplesHistory = []):
         self.game = game
         self.nnet = nnet
-        self.pnet = self.nnet.__class__(self.game)  # the competitor netwok
+        self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
         self.mcts = MCTS(self.game, self.nnet, self.args)
-        self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
-        self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
+        self.trainExamplesHistory = trainExamplesHistory  # history of examples from args.numItersForTrainExamplesHistory latest iterations
+        self.skipFirstSelfPlay = False if self.trainExamplesHistory == [] else True # can be overriden in loadTrainExamples()
 
     def executeEpisode(self):
         """
@@ -76,9 +76,9 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
-        best_filename = self.args.best_filename+'_cpuct_'+str(self.args.cpuct) + '.pth.tar'
         temp_filename = 'temp' + '.pth.tar'
-
+        self.pnet.save_checkpoint(folder=self.args.checkpoint, filename=self.args.best_filename)
+        
         for i in range(1, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
@@ -127,7 +127,7 @@ class Coach():
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=best_filename)
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.args.best_filename)
 
     def getCheckpointFile(self, iteration, last=False):
         if last:

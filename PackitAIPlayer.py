@@ -2,106 +2,121 @@ import numpy as np
 from huggingface_hub import hf_hub_download
 
 from HexGame.HexGame import *
-from HexGame.keras.NNet import NNetWrapper as HexNet
-from HexGame.keras.NNetSmall import NNetWrapper as HexNetSmall
+from HexGame.pytorch.NNet import NNetWrapper as torch_hexnnet
+from TriangleGame.pytorch.NNet import NNetWrapper as torch_trinnet
 from TriangleGame.TriangleGame import *
-from TriangleGame.keras.NNet import NNetWrapper as TriNet
-from TriangleGame.keras.NNetSmall import NNetWrapper as TriNetSmall
-import tensorflow as tf
 from PackitMCTS import MCTS
 from utils import *
 import logging
 import os
-
-log = logging.getLogger(__name__)
+import torch
+import coloredlogs
 
 
 class AIPlayer:
+    log = logging.getLogger(__name__)
+    coloredlogs.install(level='INFO')
 
-    def __init__(self, size, mode='triangular'):
+    def __init__(self,
+                 size,
+                 mode,
+                 model_framework = 'pytorch',
+                 local = False,
+                 local_folder=None,
+                 local_filename = None,
+                 hf_repo_id='lgfn/packit-polygons-models',
+                 hf_filename = None,
+                 numMCTSSims = 10,
+                 cpuct = 5,
+                 nnet = None):
+        
+        assert mode == 'triangular' or mode == 'hexagonal', "Invalid game mode, choose 'triangular' or 'hexagonal'"
+        assert model_framework == 'pytorch' or model_framework == 'keras', "Invalid model argument, choose 'pytorch' or 'keras'"
+        assert isinstance(local, bool), "'local' should be of boolean type"
+        
+        self.size = size
+        self.mode = mode
+        self.model_framework = model_framework
+        mcts_args = dotdict({'numMCTSSims': numMCTSSims,
+                        'cpuct': cpuct})
 
-        mcts_args = dotdict({'numMCTSSims': 10,
-                             'cpuct': 1.0})
-
-        args = dotdict({'tri_weights_folder': './alpha-zero-general/packit-polygons-models/triangle_models/pytorch/',
-                        'hex_weights_folder': './alpha-zero-general/packit-polygons-models/hex_models/pytorch/',
-                        'weights_filename': 'best.pth.tar',
-                        # 'tri_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/triangle_models/',
-                        # 'hex_hf_weights_path': 'https://huggingface.co/lgfn/packit-polygons-models/resolve/main/hex_models/',
-                        'hex_hf_weights_path': 'keras/hex_models/',
-                        'tri_hf_weights_path': 'keras/triangle_models/',
-                        'hf_repo_id': 'lgfn/packit-polygons-models'})
+        
 
         if mode == 'triangular':
             self.game = TriangleGame(size)
-            args.tri_weights_folder += 'size_' + str(size) + '/'
-
-            local_weights_path = args.tri_weights_folder + args.weights_filename
-
-            if size < 5:
-                self.nnet = TriNetSmall(self.game)
-            else:
-                self.nnet = TriNet(self.game)
-
-            if not os.path.isfile(local_weights_path):
-
-                print('Local weights file not found')
-
-                weights_path = args.tri_hf_weights_path + 'size_' + str(size) + '/' + args.weights_filename
-
-                try:
-                    print('Downloading weights...')
-                    print('Accessing ', weights_path)
-                    # self.nnet.nnet.model.load_weights(tf.keras.utils.get_file(args.weights_filename, weights_path))
-                    # self.nnet.save_checkpoint(folder=args.tri_weights_folder, filename=args.weights_filename)
-                    weights_path = hf_hub_download(repo_id=args.hf_repo_id, filename=weights_path)
-                    self.nnet.nnet.model.load_weights(weights_path)
-                except Exception as e:
-                    #print(e)
-                    print('Weights not found, using untrained model')
-
-
-            else:
-                self.nnet.load_checkpoint(folder=args.tri_weights_folder, filename=args.weights_filename)
-
-
-        elif mode == 'hexagonal':
-            self.game = HexGame(size)
-            args.hex_weights_folder += 'size_' + str(size) + '/'
-
-            local_weights_path = args.hex_weights_folder + args.weights_filename
-
-            if size < 3:
-                self.nnet = HexNetSmall(self.game)
-            else:
-                self.nnet = HexNet(self.game)
-
-            if not os.path.isfile(local_weights_path):
-
-                print('Local weights file not found')
-
-                # weights_path = args.hex_hf_weights_path + 'size_'+str(size)+'/' + args.weights_filename
-                weights_path = args.hex_hf_weights_path + 'size_' + str(size) + '/' + args.weights_filename
-
-                try:
-                    print('Downloading weights...')
-                    print('Accessing ', weights_path)
-                    weights_path = hf_hub_download(repo_id=args.hf_repo_id, filename=weights_path)
-                    self.nnet.nnet.model.load_weights(weights_path)
-
-                    # self.nnet.nnet.model.load_weights(tf.keras.utils.get_file(args.weights_filename, weights_path))
-                    # self.nnet.save_checkpoint(folder=args.hex_weights_folder, filename=args.weights_filename)
-                except Exception as e:
-                    print(e)
-                    print("Weights not found, using untrained model")
-
-            else:
-                self.nnet.load_checkpoint(folder=args.hex_weights_folder, filename=args.weights_filename)
         else:
-            raise Exception('Invalid mode')
+            self.game = HexGame(size)
+
+        if nnet:
+            self.nnet = nnet
+            self.mcts = MCTS(self.game, self.nnet, mcts_args)
+            return
+
+        if model_framework == 'keras':
+            print('work on keras models in progress')
+        else:
+            if mode == 'triangular':
+                self.nnet = torch_trinnet(self.game)
+            else:
+                self.nnet = torch_hexnnet(self.game)
+
+        mcts_args = dotdict({'numMCTSSims': numMCTSSims,
+                        'cpuct': cpuct})
+        self.mcts = MCTS(self.game, self.nnet, mcts_args)
+        
+        if local:
+            if not local_folder:
+                self.log.error("'local_folder' argument not provided with 'local' being True, initializing with random model")
+                return 
+            if not local_filename:
+                self.log.error("'local_filename' argument not provided with 'local' being True, initializing with random model")
+                return 
+            filepath = os.path.join(local_folder, local_filename)
+            if not os.path.isfile(filepath):
+                self.log.error('File ' + filepath + ' does not exist, , initializing with random model')
+                return
+            self.log.info('Loading local model checkpoint "%s"...', filepath)
+            try:
+                self.nnet.load_checkpoint(folder = local_folder, filename=local_filename)
+                self.log.info('Loading done!')
+            except Exception as e:
+                self.log.error('Loading failed: ', exc_info=True)
+                self.log.warning('Initializing with random model')
+                return
+        
+        else:
+            if not hf_filename:
+                self.log.info("'hf_filename' argument not provided, using default location")
+                if self.mode == 'triangular':
+                    mode_str = 'triangle_models'
+                else: mode_str = 'hex_models'
+
+                if self.model_framework == 'keras':
+                    file = 'best.weights.h5'
+                else:
+                    file = 'best_cpuct_5.pth.tar'
+                hf_filename = self.model_framework + '/' + mode_str + '/size_' + str(self.size) + '/' + file
+            
+            self.log.info('Loading HuggingFace model: ' + hf_repo_id +'/' + hf_filename +  '...')
+            if self.model_framework == 'keras':
+                print('keras model loading in the works, aborting')
+                return
+            else:
+                try:
+                
+                    weights_hf = hf_hub_download(repo_id=hf_repo_id, filename=hf_filename)
+
+                    map_location = None if torch.cuda.is_available() else 'cpu'
+                    checkpoint = torch.load(weights_hf, map_location=map_location, weights_only=True)
+                    self.nnet.nnet.load_state_dict(checkpoint['state_dict'])
+                    self.log.info('Loading done!')
+                
+                except Exception as e:
+                    self.log.error('Loading failed: ', exc_info=True)
+                    return
 
         self.mcts = MCTS(self.game, self.nnet, mcts_args)
-        return
+        
 
     def mcts_get_action(self, board, turn):
         """
@@ -113,7 +128,7 @@ class AIPlayer:
             return np.zeros_like(board)
         probs = self.mcts.getActionProb(board, turn, temp=0)
         if np.max(probs * valids) == 0:
-            log.info('Returning random move')
+            self.log.info('All valid moves masked, returning random move')
             action_ix = np.random.choice(np.nonzero(valids)[0])
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs * valids)
@@ -128,7 +143,7 @@ class AIPlayer:
             return np.zeros_like(board)
         probs, v = self.nnet.predict(board)
         if np.max(probs * valids) == 0:
-            log.info('Returning random move')
+            self.log.info('All valid moves masked, returning random move')
             action_ix = np.random.choice(np.nonzero(valids)[0])
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs * valids)
@@ -140,7 +155,7 @@ class AIPlayer:
             return np.zeros_like(board)
         probs = self.mcts.getActionProb(board, turn, temp=0)
         if np.max(probs*valids)==0:
-            log.info('Returning random move')
+            self.log.info('All valid moves masked, returning random move')
             action_ix = np.random.choice(np.nonzero(valids)[0])
             return self.game.action_space[action_ix]
         action_ix = np.argmax(probs*valids)

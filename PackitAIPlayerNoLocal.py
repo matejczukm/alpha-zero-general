@@ -16,18 +16,17 @@ log = logging.getLogger(__name__)
 
 class AIPlayer:
 
-    def __init__(self, size, mode='triangular'):
+    def __init__(self, size, mode='triangular', weights_filename = 'best_cpuct_1.pth.tar'):
 
         mcts_args = dotdict({'numMCTSSims': 10,
                              'cpuct': 1.0})
 
         args = dotdict({'tri_weights_folder': './alpha-zero-general/packit-polygons-models/pytorch/triangle_models/',
                         'hex_weights_folder': './alpha-zero-general/packit-polygons-models/pytorch/hex_models/',
-                        'weights_filename': 'best_cpuct_1.pth.tar',
                         'hex_hf_weights_path': 'pytorch/hex_models/',
                         'tri_hf_weights_path': 'pytorch/triangle_models/',
                         'hf_repo_id': 'lgfn/packit-polygons-models'})
-
+        self.weights_filename = weights_filename
         if mode == 'triangular':
             self.game = TriangleGame(size)
             args.tri_weights_folder += 'size_' + str(size) + '/'
@@ -35,7 +34,7 @@ class AIPlayer:
 
             self.nnet = TriNet(self.game)
 
-            weights_path = args.tri_hf_weights_path + 'size_' + str(size) + '/' + args.weights_filename
+            weights_path = args.tri_hf_weights_path + 'size_' + str(size) + '/' + self.weights_filename
 
             try:
                 print('Downloading weights...')
@@ -44,7 +43,7 @@ class AIPlayer:
                 weights_hf = hf_hub_download(repo_id=args.hf_repo_id, filename=weights_path)
 
                 map_location = None if torch.cuda.is_available() else 'cpu'
-                checkpoint = torch.load(weights_hf, map_location=map_location)
+                checkpoint = torch.load(weights_hf, map_location=map_location, weights_only=True)
                 self.nnet.nnet.load_state_dict(checkpoint['state_dict'])
                 print('Donwload successful')
             
@@ -59,7 +58,7 @@ class AIPlayer:
             args.hex_weights_folder += 'size_' + str(size) + '/'
             self.nnet = HexNet(self.game)
 
-            weights_path = args.hex_hf_weights_path + 'size_' + str(size) + '/' + args.weights_filename
+            weights_path = args.hex_hf_weights_path + 'size_' + str(size) + '/' + self.weights_filename
 
 
             try:
@@ -68,7 +67,7 @@ class AIPlayer:
                 weights_hf = hf_hub_download(repo_id=args.hf_repo_id, filename=weights_path)
 
                 map_location = None if torch.cuda.is_available() else 'cpu'
-                checkpoint = torch.load(weights_hf, map_location=map_location)
+                checkpoint = torch.load(weights_hf, map_location=map_location, weights_only=True)
                 self.nnet.nnet.load_state_dict(checkpoint['state_dict'])
 
                 print('Donwload successful')

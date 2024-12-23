@@ -172,4 +172,6 @@ class TriangleGame(Game):
     @staticmethod
     def display(board):
         print(np.array2string(board))
+    
+
 

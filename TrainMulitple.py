@@ -1,9 +1,7 @@
 import logging
 
 import coloredlogs
-import sys
-sys.path.insert(0, r"C:\Users\User\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages")
-#I really should fix that
+
 from PackitCoach import Coach
 from HexGame.HexGame import HexGame
 from TriangleGame.TriangleGame import TriangleGame
@@ -21,26 +19,28 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 3,             # Number of iterations
+    'numIters': 50,             # Number of iterations
     'numEps': 25,              # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,        #
     'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,    # Number of game examples to train the neural networks.
-    'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
-    'arenaCompare': 30,         # Number of games to play during arena play to determine if new net will be accepted.
-    'cpuct': 1,
+    'numMCTSSims': 40,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 40,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 5,
     'checkpoint': './packit-polygons-models/',
     'load_model': True,
-    'load_folder_file': ('./packit-polygons-models/pytorch','best_cpuct_1.pth.tar'),
+    'load_folder_file': ('./packit-polygons-models/pytorch','best_cpuct_5.pth.tar'),
     'best_filename': 'best',
     'numItersForTrainExamplesHistory': 20,
-    'tri_board_sizes': [3],
-    'hex_board_sizes': [],
+    'tri_board_sizes': [],
+    'hex_board_sizes': [4,5],
     'model': 'pytorch' #either pytorch or keras
 })
 
 
 def main():
+
+    args.best_filename = args.best_filename+'_cpuct_'+str(args.cpuct) + '.pth.tar'
 
 
     for size in args.tri_board_sizes:
