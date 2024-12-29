@@ -15,8 +15,10 @@ from TriangleGame.pytorch.NNet import NNetWrapper as torch_trinnet
 from utils import *
 import os
 from huggingface_hub import hf_hub_download
-import torch
+from torch import load
+from torch.cuda import is_available
 from PackitAIPlayer import AIPlayer
+from pickle import Unpickler
 
 
 class PackitTrainer():
@@ -37,7 +39,7 @@ class PackitTrainer():
         self.size = size
         self.mode = mode
         self.model_framework = model_framework
-        self.trainingExamplesHistory = []
+        self.trainExamplesHistory = []
         self.last_local_folder = None
         self.last_local_filename = None
 
@@ -118,8 +120,15 @@ class PackitTrainer():
             else:
                 self.nnet = torch_hexnnet(self.game)
 
-    def loadTrainingExamples(self, path):
-        pass
+    def loadTrainingExamples(self, folder, filename):
+        filepath = os.path.join(folder, filename)
+        if not os.path.isfile(filepath):
+            self.log.error('File ' + filepath + ' not found')
+            return
+        self.log.info("File with trainExamples found. Loading it...")
+        with open(filepath, "rb") as f:
+            self.trainExamplesHistory = Unpickler(f).load()
+        self.log.info('Loading done!')
 
 
 
@@ -160,7 +169,7 @@ class PackitTrainer():
         })
 
         self.log.info('Loading the Coach...')
-        c = Coach(self.game, self.nnet, args, trainExamplesHistory=self.trainingExamplesHistory)
+        c = Coach(self.game, self.nnet, args, trainExamplesHistory=self.trainExamplesHistory)
         self.log.info('Starting the learning process for %s board of size %s 🎉',self.mode, self.size)
         c.learn()
         self.last_local_folder = checkpoint_path
