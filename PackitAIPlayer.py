@@ -10,12 +10,10 @@ from utils import *
 import logging
 import os
 import torch
-import coloredlogs
 
 
 class AIPlayer:
     log = logging.getLogger(__name__)
-    coloredlogs.install(level='INFO')
 
     def __init__(self,
                  size,
