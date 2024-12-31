@@ -24,7 +24,7 @@ class AIPlayer:
                  local_filename = None,
                  hf_repo_id='lgfn/packit-polygons-models',
                  hf_filename = None,
-                 numMCTSSims = 530,
+                 numMCTSSims = 50,
                  cpuct = 1,
                  nnet = None):
         
