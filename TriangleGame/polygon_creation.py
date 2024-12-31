@@ -30,8 +30,8 @@ def end_value(k):
         int: The size of the biggest triangle, from which k-element polygon can be made, unequivocally.
     """
     return int(
-        max(np.floor(np.sqrt(k) * 2), np.ceil(k/2))
-    )
+        max(np.floor(np.sqrt(k) * 2), np.ceil(k/2)+1)
+        )
 
 
 def get_range(k):
