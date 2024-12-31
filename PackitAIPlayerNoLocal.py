@@ -44,7 +44,7 @@ class AIPlayer:
                 map_location = None if torch.cuda.is_available() else 'cpu'
                 checkpoint = torch.load(weights_hf, map_location=map_location, weights_only=True)
                 self.nnet.nnet.load_state_dict(checkpoint['state_dict'])
-                print('Donwload successful')
+                print('Download successful')
 
             except Exception as e:
                 print(e)

@@ -24,8 +24,8 @@ class AIPlayer:
                  local_filename = None,
                  hf_repo_id='lgfn/packit-polygons-models',
                  hf_filename = None,
-                 numMCTSSims = 10,
-                 cpuct = 5,
+                 numMCTSSims = 530,
+                 cpuct = 1,
                  nnet = None):
         
         assert mode == 'triangular' or mode == 'hexagonal', "Invalid game mode, choose 'triangular' or 'hexagonal'"
