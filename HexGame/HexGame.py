@@ -9,15 +9,7 @@ import numpy as np
 
 
 class HexGame(Game):
-    """
-    This class specifies the base Game class. To define your own game, subclass
-    this class and implement the functions below. This works when the game is
-    two-player, adversarial and turn-based.
-
-    Use 1 for player1 and -1 for player2.
-
-    See othello/OthelloGame.py for an example implementation.
-    """
+    
     def __init__(self, board_side):
         self.board_side = board_side
         self.board_size = board_side*2-1
@@ -25,7 +17,7 @@ class HexGame(Game):
         number_of_fields = (self.board_size)**2 - (self.board_size-board_side)*(self.board_size-board_side+1)
         
         #checking the sum of arithmetic series by calculating delta
-        self.max_k = int(np.floor((np.sqrt(8*number_of_fields+1)-1)/2))
+        self.max_k = int(np.floor((np.sqrt(8*number_of_fields-7)+1)/2))
         #print("max_k: ", self.max_k)
          
         self.action_space = np.zeros([0, self.board_size, self.board_size])
