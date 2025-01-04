@@ -2,11 +2,11 @@ import os
 import time
 
 import numpy as np
+from ...NeuralNet import NeuralNet
 
-from alpha_zero_genral.utils import *
-from alpha_zero_genral.NeuralNet import NeuralNet
+from ...utils import *
 
-from .TriangleNNetSmall import TriangleNNet as trinnet
+from .TriangleNNet import TriangleNNet as trinnet
 
 args = dotdict({
     'lr': 0.001,

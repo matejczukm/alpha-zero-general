@@ -2,10 +2,7 @@ from .triangular_mode import frontend_interface as tri_fi
 from .triangular_mode import data_conversions as tri_dc
 from .hexagonal_mode import frontend_interface as hex_fi
 from .hexagonal_mode import data_conversions as hex_dc
-import sys
-
-sys.path.append('..')
-from alpha_zero_general.PackitAIPlayer import AIPlayer
+from ..alpha_zero_general.PackitAIPlayer import AIPlayer
 
 ai_players = {}
 

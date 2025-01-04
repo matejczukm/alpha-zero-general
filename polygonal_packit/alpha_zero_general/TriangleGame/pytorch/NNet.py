@@ -1,19 +1,15 @@
 import os
-import sys
 import time
 
 import numpy as np
-from tqdm import tqdm
-
-# sys.path.append('../../')
-from alpha_zero_general.utils import *
-from alpha_zero_general.NeuralNet import NeuralNet
-
 import torch
 import torch.optim as optim
+from ...NeuralNet import NeuralNet
+from ...utils import *
+from tqdm import tqdm
 
-from .HexNNet import HexNNet as hexnnet
-from .HexNNetSmall import HexNNet as hexnnetsm
+from .TriangleNNet import TriangleNNet as trinnet
+from .TriangleNNetSmall import TriangleNNet as trinnetsm
 
 args = dotdict({
     'lr': 0.001,
@@ -28,10 +24,10 @@ args = dotdict({
 class NNetWrapper(NeuralNet):
     def __init__(self, game):
 
-        if game.getBoardSize()[0] < 4:
-            self.nnet = hexnnetsm(game, args)
+        if game.getBoardSize()[0] < 5:
+            self.nnet = trinnetsm(game, args)
         else:
-            self.nnet = hexnnet(game, args)
+            self.nnet = trinnet(game, args)
 
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
@@ -122,5 +118,6 @@ class NNetWrapper(NeuralNet):
         if not os.path.exists(filepath):
             print("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
-        checkpoint = torch.load(filepath, map_location=map_location, weights_only = True)
+
+        checkpoint = torch.load(filepath, map_location=map_location, weights_only=True)
         self.nnet.load_state_dict(checkpoint['state_dict'])

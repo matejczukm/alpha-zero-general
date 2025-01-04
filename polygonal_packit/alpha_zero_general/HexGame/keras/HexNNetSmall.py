@@ -1,13 +1,13 @@
-import sys
-sys.path.append('..')
-from utils import *
+# import sys
+# sys.path.append('..')
+from ...utils import *
 
 import argparse
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
 
-class TriangleNNet():
+class HexNNet:
     def __init__(self, game, args):
         # game params
         self.board_x, self.board_y = game.getBoardSize()

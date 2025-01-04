@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-from alpha_zero_general.Game import Game
+from ..Game import Game
 
-from game_core.triangular_mode.game_logic import *
+from ...game_core.triangular_mode.game_logic import *
 
 
 class TriangleGame(Game):

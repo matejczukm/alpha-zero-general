@@ -1,18 +1,11 @@
-import argparse
 import os
-import shutil
 import time
-import random
+
 import numpy as np
-import math
-import sys
-sys.path.append('../..')
-from utils import *
-from NeuralNet import NeuralNet
 
-import argparse
-
-from .HexNNetSmall import HexNNet as hxnnet
+from .HexNNet import HexNNet as hxnnet
+from ...NeuralNet import NeuralNet
+from ...utils import *
 
 args = dotdict({
     'lr': 0.001,
@@ -74,6 +67,6 @@ class NNetWrapper(NeuralNet):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
         filepath = os.path.join(folder, filename)
         if not os.path.exists(filepath):
-            raise("No model in path {}".format(filepath))
+            raise Exception("No model in path {}".format(filepath))
 
         self.nnet.model.load_weights(filepath)
