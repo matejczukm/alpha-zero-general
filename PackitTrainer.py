@@ -182,7 +182,7 @@ class PackitTrainer():
         return {
             'size' : self.size,
             'mode' : self.mode,
-            'model_framwork' : self.model_framework
+            'model_framework' : self.model_framework
         }
     def getAIPlayer(self, numMCTSSims=10, cpuct=5):
         return AIPlayer(self.size,
