@@ -15,10 +15,10 @@ from TriangleGame.pytorch.NNet import NNetWrapper as torch_trinnet
 from utils import *
 import os
 from huggingface_hub import hf_hub_download
-from torch import load
-from torch.cuda import is_available
+import torch
 from PackitAIPlayer import AIPlayer
 from pickle import Unpickler
+from PackitNNetWrapper import NNetWrapper
 
 
 class PackitTrainer():
@@ -32,7 +32,7 @@ class PackitTrainer():
 
 
 
-    def __init__(self, size, mode, model_framework = 'pytorch'):
+    def __init__(self, size, mode, model_framework = 'pytorch', nnet_module = None):
         
         assert mode == 'triangular' or mode == 'hexagonal', "Invalid game mode, choose 'triangular' or 'hexagonal'"
         assert model_framework == 'pytorch' or model_framework == 'keras', "Invalid model argument, choose 'pytorch' or 'keras'"
@@ -42,6 +42,7 @@ class PackitTrainer():
         self.trainExamplesHistory = []
         self.last_local_folder = None
         self.last_local_filename = None
+        self.nnet_module = nnet_module
 
         if mode == 'triangular':
             self.game = TriangleGame(size)
@@ -51,6 +52,9 @@ class PackitTrainer():
         if model_framework == 'keras':
             print('work on keras models in progress')
         else:
+            if self.nnet_module:
+                self.nnet = NNetWrapper(self.game, self.nnet_module)
+                return
             if mode == 'triangular':
                 self.nnet = torch_trinnet(self.game)
             else:
@@ -114,6 +118,9 @@ class PackitTrainer():
     def resetModel(self):
         if self.model_framework == 'keras':
             print('work on keras models in progress')
+        
+        if self.nnet_module:
+            self.nnet = NNetWrapper(self.game, self.nnet_module)
         else:
             if self.mode == 'triangular':
                 self.nnet = torch_trinnet(self.game)
@@ -169,7 +176,7 @@ class PackitTrainer():
         })
 
         self.log.info('Loading the Coach...')
-        c = Coach(self.game, self.nnet, args, trainExamplesHistory=self.trainExamplesHistory)
+        c = Coach(self.game, self.nnet, args, trainExamplesHistory=self.trainExamplesHistory, nnet_module=self.nnet_module)
         self.log.info('Starting the learning process for %s board of size %s 🎉',self.mode, self.size)
         c.learn()
         self.last_local_folder = checkpoint_path

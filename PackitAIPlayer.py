@@ -10,6 +10,7 @@ from utils import *
 import logging
 import os
 import torch
+from PackitNNetWrapper import NNetWrapper
 
 
 class AIPlayer:
@@ -26,7 +27,8 @@ class AIPlayer:
                  hf_filename = None,
                  numMCTSSims = 50,
                  cpuct = 1,
-                 nnet = None):
+                 nnet = None,
+                 nnet_module = None):
         
         assert mode == 'triangular' or mode == 'hexagonal', "Invalid game mode, choose 'triangular' or 'hexagonal'"
         assert model_framework == 'pytorch' or model_framework == 'keras', "Invalid model argument, choose 'pytorch' or 'keras'"
@@ -45,13 +47,18 @@ class AIPlayer:
         else:
             self.game = HexGame(size)
 
+        if model_framework == 'keras':
+            print('work on keras models in progress')
         if nnet:
             self.nnet = nnet
             self.mcts = MCTS(self.game, self.nnet, mcts_args)
             return
+        
+        if nnet_module:
+            self.nnet = NNetWrapper(self.game, nnet_module)
+            self.mcts = MCTS(self.game, self.nnet, mcts_args)
 
-        if model_framework == 'keras':
-            print('work on keras models in progress')
+        
         else:
             if mode == 'triangular':
                 self.nnet = torch_trinnet(self.game)
