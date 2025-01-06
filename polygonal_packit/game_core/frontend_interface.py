@@ -19,7 +19,13 @@ def start_new_game(
         )
 
     if custom_ai_players:
-        ai_players.update(custom_ai_players)
+        # ai_players.update(custom_ai_players)
+        for name, player in custom_ai_players.items():
+            if isinstance(player, AIPlayer):
+                ai_players[name] = player
+                print(f'AIPlayer named {name} added.')
+            else:
+                print('Custom AI Players should be instances of AIPlayer.')
 
     model_name = mode + str(board_size)
     if model_name not in ai_players:
