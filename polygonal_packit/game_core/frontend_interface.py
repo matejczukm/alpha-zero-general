@@ -7,12 +7,19 @@ from ..alpha_zero_general.PackitAIPlayer import AIPlayer
 ai_players = {}
 
 
-def start_new_game(board_size, mode, ai_mode, ai_starts):
+def start_new_game(
+        board_size: int,
+        mode: str, ai_mode: bool = False,
+        ai_starts: bool = False,
+        custom_ai_players: dict = None):
     if not ai_mode or not ai_starts:
-        return start_game(
+        return _start_game(
             board_size=board_size,
             mode=mode
         )
+
+    if custom_ai_players:
+        ai_players.update(custom_ai_players)
 
     model_name = mode + str(board_size)
     if model_name not in ai_players:
@@ -23,7 +30,7 @@ def start_new_game(board_size, mode, ai_mode, ai_starts):
         move = ai_player.mcts_get_action(board, 1)
         board = tri_dc.convert_numpy_array_to_triangle(board)
         move = tri_dc.convert_numpy_array_to_triangle(move)
-        return perform_move(
+        return _perform_move(
             board=board,
             move=move,
             turn=2,
@@ -33,7 +40,7 @@ def start_new_game(board_size, mode, ai_mode, ai_starts):
     move = ai_player.mcts_get_action(board, 1)
     board = hex_dc.convert_numpy_board_to_list(board)
     move = hex_dc.convert_numpy_board_to_list(move)
-    return perform_move(
+    return _perform_move(
         board=board,
         move=move,
         turn=2,
@@ -41,17 +48,20 @@ def start_new_game(board_size, mode, ai_mode, ai_starts):
     )
 
 
-def confirm_move(board, move, turn, mode, ai_mode):
-    turn = int(turn)
+def confirm_move(board: list,
+                 move: list,
+                 turn: int,
+                 mode: str,
+                 ai_mode: bool = False):
     if not ai_mode:
-        return perform_move(
+        return _perform_move(
             board=board,
             move=move,
             turn=turn,
             mode=mode
         )
 
-    board_size = len(board[-1]) if mode == 'hexagonal' else len(board)
+    board_size = len(board[0]) if mode == 'hexagonal' else len(board)
     model_name = mode + str(board_size)
     if model_name not in ai_players:
         ai_players[model_name] = AIPlayer(board_size, mode)
@@ -63,7 +73,7 @@ def confirm_move(board, move, turn, mode, ai_mode):
         next_move = ai_player.mcts_get_action(board_np, turn)
         board = tri_dc.convert_numpy_array_to_triangle(board_np)
         next_move = tri_dc.convert_numpy_array_to_triangle(next_move)
-        return perform_move(
+        return _perform_move(
             board=board,
             move=next_move,
             turn=turn + 1,
@@ -76,7 +86,7 @@ def confirm_move(board, move, turn, mode, ai_mode):
     next_move = ai_player.mcts_get_action(board_np, turn)
     board = hex_dc.convert_numpy_board_to_list(board_np)
     next_move = hex_dc.convert_numpy_board_to_list(next_move)
-    return perform_move(
+    return _perform_move(
         board=board,
         move=next_move,
         turn=turn + 1,
@@ -84,7 +94,7 @@ def confirm_move(board, move, turn, mode, ai_mode):
     )
 
 
-def start_game(board_size, mode):
+def _start_game(board_size, mode):
     if mode == 'triangular':
         return tri_fi.start_game(board_size)
     elif mode == 'hexagonal':
@@ -93,7 +103,7 @@ def start_game(board_size, mode):
         raise ValueError(f"Invalid game mode: '{mode}'. Supported modes are 'triangular' and 'hexagonal'.")
 
 
-def perform_move(board, move, turn, mode):
+def _perform_move(board, move, turn, mode):
     if mode == 'triangular':
         return tri_fi.perform_move(board, move, turn)
     elif mode == 'hexagonal':
