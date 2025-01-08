@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='polygonal_packit',
-    version='0.2.1',
+    version='0.2.2',
     author='Michał Matejczuk, Piotr Kosakowski',
     description='Hexagonal and triangular version of game Pack It! along with Alpha Zero General-based RL algorithms.',
     long_description=open('README.md').read(),
@@ -16,7 +16,8 @@ setup(
         'torch',
         'tqdm',
         'huggingface_hub',
-        'tensorflow'
+        'tensorflow',
+        'coloredlogs'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
