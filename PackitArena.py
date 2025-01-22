@@ -95,7 +95,7 @@ class Arena():
         
         
 
-    def playGames(self, num, verbose=False):
+    def playGames(self, num, verbose=False, technical_output = False):
         """
         Plays num games in which player1 starts num/2 games and player2 starts
         num/2 games.
@@ -131,6 +131,9 @@ class Arena():
                 draws += 1
         one_on_the_draw = oneWon-one_on_the_play
         two_on_the_play = twoWon-two_on_the_draw
+
+        if technical_output:
+            return one_on_the_play, one_on_the_draw, two_on_the_play, two_on_the_draw
         
         result_table = {
         "Player": ["Player 1", "Player 2"],
