@@ -20,14 +20,17 @@ class Coach:
     in Game and NeuralNet. args are specified in main.py.
     """
 
-    def __init__(self, game, nnet, args, trainExamplesHistory=[]):
+    def __init__(self, game, nnet, args, trainExamplesHistory = [], nnet_module = None):
         self.game = game
         self.nnet = nnet
-        self.pnet = self.nnet.__class__(self.game)  # the competitor network
+        if nnet_module:
+            self.pnet = self.nnet.__class__(self.game, nnet_module)
+        else:
+            self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = trainExamplesHistory  # history of examples from args.numItersForTrainExamplesHistory latest iterations
-        self.skipFirstSelfPlay = False if self.trainExamplesHistory == [] else True  # can be overriden in loadTrainExamples()
+        self.skipFirstSelfPlay = False if self.trainExamplesHistory == [] else True # can be overriden in loadTrainExamples()
 
     def executeEpisode(self):
         """
@@ -55,14 +58,14 @@ class Coach:
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
 
-            pi = self.mcts.getActionProb(canonicalBoard, turn=episodeStep, temp=temp)
+            pi = self.mcts.getActionProb(canonicalBoard, turn = episodeStep, temp=temp)
 
             trainExamples.append([canonicalBoard, self.curPlayer, pi, None])
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
-            r = self.game.getGameEnded(board, self.curPlayer, turn=episodeStep + 1)
+            r = self.game.getGameEnded(board, self.curPlayer, turn=episodeStep+1)
 
             if r != 0:
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
@@ -90,7 +93,7 @@ class Coach:
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     iterationTrainExamples += self.executeEpisode()
 
-                # save the iteration examples to the history 
+                # save the iteration examples to the history
                 self.trainExamplesHistory.append(iterationTrainExamples)
 
             if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
@@ -98,7 +101,7 @@ class Coach:
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
                 self.trainExamplesHistory.pop(0)
             # backup history to a file
-            # NB! the examples were collected using the model from the previous iteration, so (i-1)  
+            # NB! the examples were collected using the model from the previous iteration, so (i-1)
             self.saveTrainExamples(i - 1)
 
             # shuffle examples before training
@@ -116,8 +119,8 @@ class Coach:
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x, t: np.argmax(pmcts.getActionProb(x, t, temp=0)),
-                          lambda x, t: np.argmax(nmcts.getActionProb(x, t, temp=0)), self.game)
+            arena = Arena(lambda x,t: np.argmax(pmcts.getActionProb(x, t, temp=0)),
+                          lambda x,t: np.argmax(nmcts.getActionProb(x, t, temp=0)), self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d' % (nwins, pwins))
@@ -132,13 +135,13 @@ class Coach:
     def getCheckpointFile(self, iteration, last=False):
         if last:
             return 'last_checkpoint_cpuct_' + str(self.args.cpuct) + '.pth.tar'
-        return 'checkpoint_' + str(iteration) + '.pth.tar'
+        return 'checkpoint_' +  str(iteration) + '.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint
         if not os.path.exists(folder):
             os.makedirs(folder)
-        last = (iteration == self.args.numIters - 1)
+        last = (iteration == self.args.numIters-1)
         filename = os.path.join(folder, self.getCheckpointFile(iteration, last) + ".examples")
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)

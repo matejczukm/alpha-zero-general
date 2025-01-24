@@ -1,8 +1,8 @@
 import logging
 import os
-
 import torch
 from huggingface_hub import hf_hub_download
+import numpy as np
 
 from .HexGame.HexGame import *
 from .HexGame.pytorch.NNet import NNetWrapper as torch_hexnnet
@@ -10,6 +10,7 @@ from .PackitMCTS import MCTS
 from .TriangleGame.TriangleGame import *
 from .TriangleGame.pytorch.NNet import NNetWrapper as torch_trinnet
 from .utils import *
+from .PackitNNetWrapper import NNetWrapper
 
 
 class AIPlayer:
@@ -26,7 +27,8 @@ class AIPlayer:
                  hf_filename=None,
                  numMCTSSims=50,
                  cpuct=1,
-                 nnet=None):
+                 nnet=None,
+                 nnet_module=None):
 
         assert mode == 'triangular' or mode == 'hexagonal', "Invalid game mode, choose 'triangular' or 'hexagonal'"
         assert model_framework == 'pytorch' or model_framework == 'keras', "Invalid model argument, choose 'pytorch' or 'keras'"
@@ -43,13 +45,18 @@ class AIPlayer:
         else:
             self.game = HexGame(size)
 
+        if model_framework == 'keras':
+            print('work on keras models in progress')
         if nnet:
             self.nnet = nnet
             self.mcts = MCTS(self.game, self.nnet, mcts_args)
             return
 
-        if model_framework == 'keras':
-            print('work on keras models in progress')
+        if nnet_module:
+            self.nnet = NNetWrapper(self.game, nnet_module)
+            self.mcts = MCTS(self.game, self.nnet, mcts_args)
+
+
         else:
             if mode == 'triangular':
                 self.nnet = torch_trinnet(self.game)
@@ -134,7 +141,7 @@ class AIPlayer:
 
     def nnet_get_action(self, board, turn):
         """
-        Returns np.array representation of model's action using only neural net prediction
+        Returns np.array representation of model's action using only neural net predicition
         """
         valids = self.game.getValidMoves(board, 1, turn)
         if np.max(valids) == 0:
