@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='polygonal_packit',
-    version='0.2.3',
+    version='0.2.4',
     author='Michał Matejczuk, Piotr Kosakowski',
     description='Hexagonal and triangular version of game Pack It! along with Alpha Zero General-based RL algorithms.',
     long_description=open('README.md').read(),
