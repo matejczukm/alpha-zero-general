@@ -19,7 +19,7 @@ from huggingface_hub import hf_hub_download
 # from torch.cuda import is_available
 from .PackitAIPlayer import AIPlayer
 from pickle import Unpickler
-from PackitNNetWrapper import NNetWrapper
+from .PackitNNetWrapper import NNetWrapper
 
 
 
